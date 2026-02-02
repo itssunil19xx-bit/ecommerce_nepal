@@ -52,7 +52,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class RegisterView(generics.CreateAPIView):
-    query_set = User.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -63,7 +63,7 @@ class RegisterView(generics.CreateAPIView):
 
         refresh = RefreshToken.for_user(user)
 
-        return Response({'user': UserSerializer(user, context=self.get_serializer_context().data),
+        return Response({'user': UserSerializer(user, context=self.get_serializer_context()).data,
                          'refresh': str(refresh),
                          'access': str(refresh.access_token),
                          'message': _('User registered successfully'),
@@ -81,7 +81,7 @@ class LoginView(TokenObtainPairView):
 
         refresh = RefreshToken.for_user(user)
 
-        return Response({'user': UserSerializer(user, context=self.get_serializer_context().data),
+        return Response({'user': UserSerializer(user, context=self.get_serializer_context()).data,
                          "refresh":  str(refresh),
                          'access': str(refresh.access_token),
                          "message": _("login sucessfully"),

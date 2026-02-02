@@ -19,13 +19,13 @@ urlpatterns = [
          name='change-password'),
 
     # for password reser
-    path('password-reset/', views.PasswordResetView.as_view, name='password-reset'),
-    path('password-reset-conform/', views.PasswordResetConformView.as_view(),
+    path('password-reset/', views.PasswordResetView.as_view(), name='password-reset'),
+    path('password-reset-confirm/', views.PasswordResetConformView.as_view(),
          name='password-reset-comnform'),
 
     # user management for admins only
 
-    path('users', views.UserListView.as_view(), name='user-list'),
-    path('user/<int:id>', views.UserDetailView.as_view(), name='user-detail'),
+    path('users/', views.UserListView.as_view(), name='user-list'),
+    path('user/<int:id>/', views.UserDetailView.as_view(), name='user-detail'),
 
 ]

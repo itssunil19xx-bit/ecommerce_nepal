@@ -31,7 +31,7 @@ class UserAdmin(BaseUserAdmin):
         (_('Personal Info'), {
             'fields': (
                 'first_name', 'last_name', 'phone_number',
-                'province', 'district', 'municipality', 'ward_number'
+                'province', 'district', 'municipality', 'ward_no'
             )
         }),
         (_('Permissions'), {

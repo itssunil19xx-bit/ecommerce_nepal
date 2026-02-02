@@ -104,7 +104,7 @@ class UserProfile(models.Model):
     twitter_url = models.URLField(blank=True)
 
     receive_marketing_emails = models.BooleanField(default=True)
-    receve_sms_notiifications = models.BooleanField(default=True)
+    receive_sms_notifications = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = _('user profile')

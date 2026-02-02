@@ -9,8 +9,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = [
             'avatar', 'date_of_birth', 'company_name',
-            'pan_vat_number', 'seller_license', 'secondary_email',
-            'secondary_phone', 'facebook_url', 'twitter_url',
+            'pan_vat_number', 'seller_license',
+            'facebook_url', 'twitter_url',
             'receive_marketing_emails', 'receive_sms_notifications'
         ]
         read_only_field = ['created_at', 'updated_at']
@@ -21,14 +21,14 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, style={
                                      'input_type': 'passwprd'})
 
-    conform_password = serializers.CharField(
+    confirm_password = serializers.CharField(
         write_only=True, required=True, style={'input_typr': "password"})
 
     class Meta:
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'phone_number',
-            'role', 'province', 'district', 'municipality', 'ward_number',
+            'role', 'province', 'district', 'municipality', 'ward_no',
             'is_email_verified', 'is_phone_verified',
             'password', 'confirm_password', 'profile',
             'created_at', 'updated_at'
@@ -39,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
-        if data.get('password') != data.get('conform_password'):
+        if data.get('password') != data.get('confirm_password'):
             raise serializers.ValidationError(
                 {
                     'conform password': _("password do not match")
@@ -52,9 +52,10 @@ class UserSerializer(serializers.ModelSerializer):
                     'phone_number': _("phone number is required for seller ")
                 }
             )
+        return data
 
     def create(self, validated_data):
-        validated_data.pop('conform_password', None)
+        validated_data.pop('confirm_password', None)
         password = validated_data.pop('password', None)
         user = User(**validated_data)
         user.set_password(password)
@@ -65,7 +66,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         password = validated_data.pop('password', None)
-        validated_data.pop('conform_password', None)
+        validated_data.pop('confirm_password', None)
         for attr, value in validated_data.items():
             setattr(input, attr, value)
 
@@ -96,23 +97,23 @@ class LoginSerializer(serializers.ModelSerializer):
             if not user:
                 raise serializers.ValidationError(_("unable to login with provided credentials"),
                                                   code="authorization")
-            else:
-                raise serializers.ValidationError(_("Must include 'email' and 'password'"),
-                                                  code="authorization")
 
             data['user'] = user
             return data
+        else:
+            raise serializers.ValidationError(
+                _("must include email and password"), code="authorization")
 
 
 class ChangePasswordSerializzer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
-    conform_new_password = serializers.CharField(required=True)
+    confirm_new_password = serializers.CharField(required=True)
 
     def validate(self, data):
-        if data['new_password'] != data['comform_new_password']:
+        if data['new_password'] != data['confirm_new_password']:
             raise serializers.ValidationError({
-                "conform_new_password": _("password do not match")
+                "confirm_new_password": _("password do not match")
             })
         return data
 
@@ -123,14 +124,14 @@ class PasswordResetserializer(serializers.Serializer):
 
 class PasswordResetConformSerializer(serializers.Serializer):
     new_password = serializers.CharField(required=True)
-    conform_new_password = serializers.CharField(required=True)
+    confirm_new_password = serializers.CharField(required=True)
     token = serializers.CharField(required=True)
     uidb64 = serializers.CharField(required=True)
 
     def validate(self, data):
         if data['new_password'] != data['comform_new_password']:
             raise serializers.ValidationError(
-                {"conform_new_password": _("password do not match")})
+                {"confirm_new_password": _("password do not match")})
 
         return data
 
@@ -141,21 +142,27 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'phone_number',
-                  'province', 'district', 'municipality', 'ward_number', 'profile']
+                  'province', 'district', 'municipality', 'ward_no', 'profile']
         read_only_fields = ['id', 'email']
 
     def update(self, instance, **validated_data):
-        profile_data = validated_data.pop['profile']
+        profile_data = validated_data.pop('profile', None)
 
         for attr, value in validated_data.items():
-            setattr(self, attr, value)
+            setattr(instance, attr, value)
+        instance.save()
 
         # to update profile
 
         if profile_data and hasattr(instance, 'profile'):
             profile = instance.profile
-            for attr, in value in profile_data.items():
-                setattr(profile, attr, value)
+            profile_serializer = UserProfileSerializer(
+                profile, data=profile_data, partial=True)
 
-            profile.save()
+            if profile_serializer.is_valid():
+                profile_serializer.save()
+            else:
+                raise serializers.ValidationError(
+                    {'profile': profile_serializer.errors})
+
         return instance
