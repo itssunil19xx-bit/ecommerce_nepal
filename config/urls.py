@@ -1,9 +1,3 @@
-"""
-URL configuration for ecommerce_nepal project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/4.2/topics/http/urls/
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -38,10 +32,10 @@ urlpatterns = [
 
     # API URLs (will be added as we create apps)
     path('api/v1/auth/', include('apps.users.urls')),
-    path('api/v1/products/', include('apps.products.urls')),
-    path('api/v1/cart/', include('apps.cart.urls')),
-    path('api/v1/orders/', include('apps.orders.urls')),
-    path('api/v1/reviews/', include('apps.reviews.urls')),
+    # path('api/v1/products/', include('apps.products.urls')),
+    # path('api/v1/cart/', include('apps.cart.urls')),
+    # path('api/v1/orders/', include('apps.orders.urls')),
+    # path('api/v1/reviews/', include('apps.reviews.urls')),
 ]
 
 # Serve media files in development
